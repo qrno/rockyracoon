@@ -1,52 +1,19 @@
 from markdown_it import MarkdownIt
 from mdit_py_plugins.front_matter import front_matter_plugin
+from jinja2 import Environment, FileSystemLoader
 import json
-
-from jinja2 import Environment, FileSystemLoader, PackageLoader, select_autoescape
-
-md = MarkdownIt('commonmark').use(front_matter_plugin)
-
-text = ("""\
----
-{
-    "title": "Hello World",
-    "subtitle": "It's a beautiful day",
-    "date": "2023-12-01",
-    "update": "2023-12-01",
-    "author": "Eduardo Quirino",
-    "template" : "article.jinja"
-}
----
-
-
-# Flamengo
-
-oi
-
-## heheeh
-
-- a
-- b
-- c
-
-<!-- term being defined when used in a definition -->
-<dl>
-  <dt>Semantic HTML</dt>
-  <dd>
-    Use the elements based on their <b>semantic</b> meaning, not their
-    appearance.
-  </dd>
-</dl>
-
-
-""")
+from pathlib import Path
 
 def render_page(text):
-    tokens = md.parse(text)
-    if len(tokens) == 0 or tokens[0].type != 'front_matter':
-        raise ValueError("Page must contain a front matter")
+    md = MarkdownIt('commonmark').use(front_matter_plugin)
 
-    context = json.loads(tokens[0].content)
+    context = {}
+    tokens = md.parse(text)
+    if len(tokens) >= 1 and tokens[0].type == 'front_matter':
+        context = json.loads(tokens[0].content)
+
+    if 'template' not in context:
+        context['template'] = 'default.html'
     context['body'] = md.render(text)
 
     env = Environment(loader=FileSystemLoader('templates'))
@@ -55,7 +22,26 @@ def render_page(text):
 
     return rendered
 
+def mirror_build(input_dir, output_dir):
+    input_path = Path(input_dir)
+    output_path = Path(output_dir)
 
-html_text = render_page(text)
-from pathlib import Path
-Path("output.html").write_text(html_text)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    for file in input_path.rglob('*md'):
+        relative = file.relative_to(input_path)
+        html_path = output_path / relative.with_suffix('.html')
+        html_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(file) as md_file:
+            md_content = md_file.read()
+
+        html_content = render_page(md_content)
+
+        with open(html_path, 'w') as html_file:
+            html_file.write(html_content)
+
+input_dir = 'content'
+output_dir = 'output'
+
+mirror_build(input_dir, output_dir)
