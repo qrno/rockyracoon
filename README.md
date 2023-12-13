@@ -20,8 +20,8 @@ pip install -r requirements.txt
 ## Usage
 
 1. Templates:
-   - Create [Jinja](https://palletsprojects.com/p/jinja/) teamplates and plcae them in the "templates/" directory.
-   - A "default.html" template is provided and will be used if the markdown doesn't specify another one.
+   - Create [Jinja](https://palletsprojects.com/p/jinja/) teamplates and place them in the "templates/" directory.
+   - A "default.html" template is provided and will be used if another one isn't specified in the Front Matter.
 2. Markdown Files:
    - Put your markdown files in the "content/" directory.
    - You can create subdirectories; they will be properly reflected in the final output
