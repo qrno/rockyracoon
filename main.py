@@ -55,6 +55,6 @@ if __name__ == "__main__":
     input_dir = args.input
     output_dir = args.output
 
-    logging.info(f"Starting build. Input directory: {input_dir}, Output directory {output_dir}")
+    logging.info(f"Starting build. Input directory: {input_dir}, Output directory: {output_dir}")
     generate_site(input_dir, output_dir)
     logging.info("Build complete")
