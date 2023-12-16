@@ -1,7 +1,8 @@
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 import json
 from pathlib import Path
+import shutil
 import logging
 import argparse
 from markdown_it import MarkdownIt
@@ -24,11 +25,18 @@ def render_page(text):
 
     return rendered
 
+def copy_static_files(input_path, output_path):
+    static_path = input_path / "static"
+    if static_path.exists():
+        shutil.copytree(static_path, output_path / "static", dirs_exist_ok=True)
+
 def generate_site(input_dir, output_dir):
     input_path = Path(input_dir)
     output_path = Path(output_dir)
 
     output_path.mkdir(parents=True, exist_ok=True)
+
+    copy_static_files(input_path, output_path)
 
     for md_file in input_path.rglob("*md"):
         relative = md_file.relative_to(input_path)
