@@ -1,5 +1,6 @@
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
+import sys
 import json
 from pathlib import Path
 import shutil
@@ -14,9 +15,15 @@ def render_page(text):
 
     context = {"template": "default.html"}
     tokens = md.parse(text)
-    if tokens and tokens[0].type == "front_matter":
-        front_matter = json.loads(tokens[0].content)
-        context.update(front_matter)
+    for token in tokens:
+        if token.type == "front_matter":
+            try:
+                front_matter = json.loads(token.content)
+                context.update(front_matter)
+            except json.decoder.JSONDecodeError as e:
+                logging.error(f"Error decoding front matter:\n{token.content}\nError details: {e}")
+                sys.exit("Exiting due to error")
+
     context["body"] = md.render(text)
 
     env = Environment(loader=FileSystemLoader("templates"))
@@ -43,14 +50,14 @@ def generate_site(input_dir, output_dir):
         html_path = output_path / relative.with_suffix(".html")
         html_path.parent.mkdir(parents=True, exist_ok=True)
 
+        logging.info(f"Processing: {md_file} -> {html_path}")
+
         with md_file.open() as f:
             md_content = f.read()
 
         html_content = render_page(md_content)
         with html_path.open("w") as f:
             f.write(html_content)
-
-        logging.info(f"Processed: {md_file} -> {html_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a website from markdown files.")
