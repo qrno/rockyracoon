@@ -7,7 +7,7 @@ import shutil
 import logging
 import argparse
 from markdown_it import MarkdownIt
-from mdit_py_plugins.front_matter import front_matter_plugin
+from mdit_py_plugins.front_matter.index import front_matter_plugin
 from jinja2 import Environment, FileSystemLoader
 
 def render_page(text):
@@ -32,18 +32,22 @@ def render_page(text):
 
     return rendered
 
-def copy_static_files(input_path, output_path):
-    static_path = input_path / "static"
-    if static_path.exists():
-        shutil.copytree(static_path, output_path / "static", dirs_exist_ok=True)
-
-def generate_site(input_dir, output_dir):
+def generate_site(input_dir, output_dir, static_dir = None):
     input_path = Path(input_dir)
     output_path = Path(output_dir)
 
     output_path.mkdir(parents=True, exist_ok=True)
 
-    copy_static_files(input_path, output_path)
+    if static_dir is None:
+        logging.info("Static directory not provided.")
+    else:
+        static_path = Path(static_dir)
+        if static_path.exists():
+            logging.info(f"Copying static directory: {static_path} -> {output_path / 'static'}")
+            shutil.copytree(static_path, output_path / "static", dirs_exist_ok=True)
+        else:
+            logging.error(f"Static directory not found: {static_path}")
+            sys.exit("Exiting due to error")
 
     for md_file in input_path.rglob("*md"):
         relative = md_file.relative_to(input_path)
@@ -63,13 +67,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a website from markdown files.")
     parser.add_argument("--input", "-i", default="content", help="Input directory with the markdown files.")
     parser.add_argument("--output", "-o", default="output", help="Output directory to store generated HTML files.",)
+    parser.add_argument("--static", "-s", default="static", help="Static directory for things like CSS files and images.")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
     input_dir = args.input
     output_dir = args.output
+    static_dir = args.static
 
-    logging.info(f"Starting build. Input directory: {input_dir}, Output directory: {output_dir}")
-    generate_site(input_dir, output_dir)
+    logging.info("Starting build.")
+    logging.info(f"Input directory: {input_dir}, Output directory: {output_dir}, Static directory: {static_dir}.")
+    generate_site(input_dir, output_dir, static_dir)
     logging.info("Build complete")
