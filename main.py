@@ -39,9 +39,8 @@ def render_page(source_md : str) -> str:
         raise ValueError(error_msg)
 
     if 'template' not in context:
-        error_msg = "Template not in front matter"
-        logging.error(error_msg)
-        raise ValueError(error_msg)
+        error_msg = "Template not in front matter, using \"default.html\""
+        logging.warning(error_msg)
 
     context["rr_body"] = md_parser.render(source_md)
     context["rr_version"] = __version__
