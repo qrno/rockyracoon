@@ -26,7 +26,7 @@ pip install -r requirements.txt
    - Put your markdown files in the "content/" directory.
    - You can create subdirectories; they will be properly reflected in the final output
 3. Front Matter:
-   - At the start of the markdown files, place a JSON object between two lines containing "---".
+   - At the start of the markdown files, you can place some TOML between two lines containing "---".
    - This data will be passed forward to your Jinja templates.
    - Use the "template" attribute to define which template should be used for the file.
 4. Run the Generator:
