@@ -26,8 +26,8 @@ def render_page(source_md : str) -> str:
 
             try:
                 front_matter = tomllib.loads(token.content)
-            except tomllib.TOMLDecodeError:
-                error_msg = "Error decoding front matter:\n{token.content}\nError details: {e}"
+            except tomllib.TOMLDecodeError as e:
+                error_msg = f"Error decoding front matter:\n{token.content}\nError details: {e}"
                 logging.error(error_msg)
                 raise ValueError(error_msg)
 
