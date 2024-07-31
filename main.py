@@ -35,8 +35,7 @@ def render_page(source_md : str) -> str:
 
     if not has_front_matter:
         error_msg = "Front matter not found"
-        logging.error(error_msg)
-        raise ValueError(error_msg)
+        logging.warning(error_msg)
 
     if 'template' not in context:
         error_msg = "Template not in front matter, using \"default.html\""
